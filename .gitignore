@@ -33,6 +33,7 @@
 !/tests/
 !/doxygen/
 !/web/
+!/.vscode/
 !/.gitattributes
 !/.gitignore
 !/.travis.yml
@@ -42,7 +43,10 @@
 !/*.bdf
 !/LICENSE
 /.idea
-.vscode
+/.vscode/*
+!/.vscode/tasks.json
+!/.vscode/launch.json
+!/.vscode/README.md
 docs/build
 docs/source/_build
 regtests/chdman/temp

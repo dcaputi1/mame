@@ -1,0 +1,63 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build arcade debug",
+      "type": "shell",
+      "command": "./build_arcade_debug.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build arcade release",
+      "type": "shell",
+      "command": "./build_arcade_release.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Clean arcade debug",
+      "type": "shell",
+      "command": "make -j4 SUBTARGET=arcade SYMBOLS=1 OPTIMIZE=0 NOWERROR=1 USE_CHEATS=0 USE_TOOLS=0 USE_TESTS=0 clean",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Clean arcade release",
+      "type": "shell",
+      "command": "make -j4 SUBTARGET=arcade SYMBOLS=1 OPTIMIZE=2 NOWERROR=1 USE_CHEATS=0 USE_TOOLS=0 USE_TESTS=0 clean",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Rebuild arcade debug",
+      "dependsOn": [
+        "Clean arcade debug",
+        "Build arcade debug"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "Rebuild arcade release",
+      "dependsOn": [
+        "Clean arcade release",
+        "Build arcade release"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    }
+  ]
+}

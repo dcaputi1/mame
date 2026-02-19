@@ -1,0 +1,118 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug mamearcade (prompt machine)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/mamearcade",
+      "args": [
+        "${input:machine}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "preLaunchTask": "Build arcade debug",
+      "setupCommands": [
+        {
+          "description": "Enable gdb pretty printing",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "Debug mamearcade (rebuild, prompt machine)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/mamearcade",
+      "args": [
+        "${input:machine}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "preLaunchTask": "Rebuild arcade debug",
+      "setupCommands": [
+        {
+          "description": "Enable gdb pretty printing",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "Run mamearcade release (prompt machine)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/mamearcade",
+      "args": [
+        "${input:machine}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "preLaunchTask": "Build arcade release",
+      "setupCommands": [
+        {
+          "description": "Enable gdb pretty printing",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "Run mamearcade release (rebuild, prompt machine)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/mamearcade",
+      "args": [
+        "${input:machine}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "preLaunchTask": "Rebuild arcade release",
+      "setupCommands": [
+        {
+          "description": "Enable gdb pretty printing",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "Attach gdb to running mamearcade",
+      "type": "cppdbg",
+      "request": "attach",
+      "program": "${workspaceFolder}/mamearcade",
+      "processId": "${command:pickProcess}",
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "cwd": "${workspaceFolder}",
+      "setupCommands": [
+        {
+          "description": "Enable gdb pretty printing",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "machine",
+      "type": "promptString",
+      "description": "Arcade machine to launch (e.g. pacman, dkong)",
+      "default": "pacman"
+    }
+  ]
+}
