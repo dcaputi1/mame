@@ -75,3 +75,4 @@ Use Run and Debug:
 - Binary path in launch configs is `${workspaceFolder}/mamearcade`.
 - Machine name is prompted each run (default: pacman).
 - GDB path is `/usr/bin/gdb`.
+- adding this note to test github
