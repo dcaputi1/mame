@@ -2269,7 +2269,7 @@ void ioport_manager::load_config(config_type cfg_type, config_level cfg_level, u
 			char const *const devicename = mapdevice_node->get_attribute_string("device", nullptr);
 			char const *const controllername = mapdevice_node->get_attribute_string("controller", nullptr);
 			if (devicename && controllername)
-				devicemap.emplace(devicename, controllername);
+					devicemap.emplace_back(devicename, controllername);
 		}
 
 		// we can't rearrange controllers after applying device-supplied defaults

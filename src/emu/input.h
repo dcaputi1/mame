@@ -29,6 +29,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 
 //**************************************************************************
@@ -45,7 +46,7 @@ class input_manager : public osd::input_manager
 {
 public:
 	// controller alias table typedef
-	using devicemap_table = util::transparent_string_map<std::string, std::string>;
+	using devicemap_table = std::vector<std::pair<std::string, std::string>>;
 
 	// construction/destruction
 	input_manager(running_machine &machine);
