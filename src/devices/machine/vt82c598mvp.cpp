@@ -7,7 +7,7 @@
 #define LOG_MAP         (1U << 1)
 
 #define VERBOSE (LOG_GENERAL)
-//#define LOG_OUTPUT_FUNC osd_printf_warning
+//#define LOG_OUTPUT_FUNC osd_printf_info
 
 #define LOGMAP(...)    LOGMASKED(LOG_MAP,  __VA_ARGS__)
 
@@ -16,11 +16,18 @@
 
 DEFINE_DEVICE_TYPE(VT82C598MVP_HOST, vt82c598mvp_host_device, "vt82c598mvp_host", "Via VT82C598MVP \"Apollo MVP3\" Host")
 
-vt82c598mvp_host_device::vt82c598mvp_host_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
-	: pci_host_device(mconfig, VT82C598MVP_HOST, tag, owner, clock)
+vt82c598mvp_host_device::vt82c598mvp_host_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
+	: pci_host_device(mconfig, type, tag, owner, clock)
 	, m_host_cpu(*this, finder_base::DUMMY_TAG)
 {
 }
+
+vt82c598mvp_host_device::vt82c598mvp_host_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+	: vt82c598mvp_host_device(mconfig, VT82C598MVP_HOST, tag, owner, clock)
+{
+	set_ids(0x11060598, 0x00, 0x060000, 0x00);
+}
+
 
 void vt82c598mvp_host_device::device_start()
 {
@@ -36,7 +43,7 @@ void vt82c598mvp_host_device::device_start()
 
 	m_ram.resize(m_ram_size/4);
 	// TODO: special, uses register 84h to define the size
-//  add_map(256 * 1024 * 1024, M_MEM | M_PREF, FUNC(vt82c598mvp_host_device::aperture_map));
+	add_map(64 * 1024 * 1024, M_MEM | M_PREF, FUNC(vt82c598mvp_host_device::aperture_map));
 
 	save_item(NAME(m_cache_control_1));
 	save_item(NAME(m_cache_control_2));
@@ -68,6 +75,8 @@ void vt82c598mvp_host_device::device_start()
 
 	save_item(NAME(m_agp_command));
 	save_item(NAME(m_agp_control));
+
+	save_item(NAME(m_smiact));
 }
 
 void vt82c598mvp_host_device::device_reset()
@@ -103,6 +112,7 @@ void vt82c598mvp_host_device::device_reset()
 	m_agp_command = 0;
 	m_agp_control = 0;
 
+	m_smiact = 1;
 	remap_cb();
 }
 
@@ -377,6 +387,10 @@ void vt82c598mvp_host_device::config_map(address_map &map)
 	// 0xfc ~ 0xff <reserved>
 }
 
+void vt82c598mvp_host_device::aperture_map(address_map &map)
+{
+}
+
 void vt82c598mvp_host_device::map_shadowram(address_space *memory_space, offs_t start_offs, offs_t end_offs, u8 setting)
 {
 	LOGMAP("- 0x%08x-0x%08x ", start_offs, end_offs);
@@ -401,6 +415,18 @@ void vt82c598mvp_host_device::map_shadowram(address_space *memory_space, offs_t 
 	}
 }
 
+// SMIACT# is canonically active low
+void vt82c598mvp_host_device::smi_act_w(int state)
+{
+	if (state)
+		m_smiact = 0;
+	else
+		m_smiact = 1;
+
+//  if (m_smiact == 0)
+//      machine().debug_break();
+	remap_cb();
+}
 
 void vt82c598mvp_host_device::map_extra(
 	uint64_t memory_window_start, uint64_t memory_window_end, uint64_t memory_offset, address_space *memory_space,
@@ -420,7 +446,18 @@ void vt82c598mvp_host_device::map_extra(
 	else
 		memory_space->install_ram      (0x00000000, 0x0009ffff, &m_ram[0x00000000/4]);
 
-	// TODO: SMI mapping control (bits 1-0 of shadow ram control [2])
+	const u8 smi_mapping = m_shadow_ram_control[2] & 3;
+
+	// 00 SMI DRAM disabled (default)
+	// 01 SMI DRAM always mapped (overlays VGA)
+	// 10 <reserved>
+	// 11 SMI DRAM on SMM
+	// HACK: function is for '691, that actually uses code/data separation for SMI DRAM
+	// (never setup shadow RAM control[2] bits 0-1)
+	if ((smi_mapping == smi_bank() && m_smiact == 0) || smi_mapping == 1)
+	{
+		memory_space->install_ram      (0x000a0000, 0x000bffff, &m_ram[0x000a0000/4]);
+	}
 
 	// upper memory hole settings
 	memory_space->install_ram          (0x00100000, 0x00dfffff, &m_ram[0x00100000/4]);
@@ -466,9 +503,14 @@ void vt82c598mvp_host_device::map_extra(
 
 DEFINE_DEVICE_TYPE(VT82C598MVP_BRIDGE, vt82c598mvp_bridge_device, "vt82c598mvp_bridge", "Via VT82C598MVP \"Apollo MVP3\" PCI-to-PCI Bridge")
 
-vt82c598mvp_bridge_device::vt82c598mvp_bridge_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
-	: pci_bridge_device(mconfig, VT82C598MVP_BRIDGE, tag, owner, clock)
+vt82c598mvp_bridge_device::vt82c598mvp_bridge_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
+	: pci_bridge_device(mconfig, type, tag, owner, clock)
 //  , m_vga(*this, finder_base::DUMMY_TAG)
+{
+}
+
+vt82c598mvp_bridge_device::vt82c598mvp_bridge_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+	: vt82c598mvp_bridge_device(mconfig, VT82C598MVP_BRIDGE, tag, owner, clock)
 {
 	set_ids_bridge(0x11068598, 0x00);
 }
@@ -484,6 +526,12 @@ void vt82c598mvp_bridge_device::device_start()
 void vt82c598mvp_bridge_device::device_reset()
 {
 	pci_bridge_device::device_reset();
+
+	command = 0x0007;
+	// has SERR# enable (bit 8), has parity error response (bit 6)
+	command_mask = 0x0147;
+	// Medium DEVSEL#, 66 MHz Capable
+	status = 0x0220;
 
 	std::fill(std::begin(m_pci2_flow_control), std::end(m_pci2_flow_control), 0);
 	m_pci2_master_control = 0;
@@ -517,3 +565,56 @@ void vt82c598mvp_bridge_device::config_map(address_map &map)
 		})
 	);
 }
+
+/*
+ * Apollo Pro overrides
+ */
+
+DEFINE_DEVICE_TYPE(VT82C691_HOST, vt82c691_host_device, "vt82c691_host", "Via VT82C691 \"Apollo Pro\" Host")
+
+vt82c691_host_device::vt82c691_host_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+	: vt82c598mvp_host_device(mconfig, VT82C691_HOST, tag, owner, clock)
+{
+	// Rev. 44 from neomania detlog.txt
+	set_ids(0x11060691, 0x44, 0x060000, 0x00);
+}
+
+void vt82c691_host_device::device_start()
+{
+	vt82c598mvp_host_device::device_start();
+
+	save_item(NAME(m_bios_scratch));
+}
+
+void vt82c691_host_device::device_reset()
+{
+	vt82c598mvp_host_device::device_reset();
+
+	std::fill(std::begin(m_bios_scratch), std::end(m_bios_scratch), 0U);
+}
+
+void vt82c691_host_device::config_map(address_map &map)
+{
+	vt82c598mvp_host_device::config_map(map);
+
+	// TODO: other minor changes + write once subvendor ID
+
+	map(0xf0, 0xf7).lrw8(
+		NAME([this] (offs_t offset) {
+			return m_bios_scratch[offset];
+		}),
+		NAME([this] (offs_t offset, u8 data) {
+			LOG("%02Xh: BIOS Scratch %02x\n", offset + 0xf0, data);
+			m_bios_scratch[offset] = data;
+		})
+	);
+}
+
+DEFINE_DEVICE_TYPE(VT82C691_BRIDGE, vt82c691_bridge_device, "vt82c691_bridge", "Via VT82C691 \"Apollo Pro\" PCI-to-PCI Bridge")
+
+vt82c691_bridge_device::vt82c691_bridge_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+	: vt82c598mvp_bridge_device(mconfig, VT82C691_BRIDGE, tag, owner, clock)
+{
+	set_ids_bridge(0x11068691, 0x00);
+}
+

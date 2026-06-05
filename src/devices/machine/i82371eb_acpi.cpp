@@ -19,7 +19,7 @@
 #define LOG_ACPIEX (1U << 5) // verbose ACPI internals
 
 #define VERBOSE (LOG_GENERAL | LOG_IO | LOG_TODO | LOG_ACPI | LOG_ACPIEX)
-//#define LOG_OUTPUT_FUNC osd_printf_warning
+//#define LOG_OUTPUT_FUNC osd_printf_info
 
 #include "logmacro.h"
 
@@ -253,6 +253,12 @@ void acpi_piix4_device::device_reset()
 
 	m_gporeg[0] = 0x7fff;
 	m_gporeg[1] = 0xbfff;
+}
+
+void acpi_piix4_device::device_validity_check(validity_checker &valid) const
+{
+	if (!this->clock())
+		osd_printf_error("%s: clock set to 0 MHz, please use implicit default of 3.5 MHz in config setter instead\n", this->tag());
 }
 
 void acpi_piix4_device::map(address_map &map)

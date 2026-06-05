@@ -1677,7 +1677,7 @@ void pc8801_state::pc8801(machine_config &config)
 
 
 	// TODO: clock, receiver handler, DCD?
-	I8251(config, m_usart, 0);
+	I8251(config, m_usart);
 	m_usart->txd_handler().set(FUNC(pc8801_state::txdata_callback));
 	m_usart->rxrdy_handler().set(FUNC(pc8801_state::rxrdy_irq_w));
 
@@ -1801,7 +1801,7 @@ void pc8801mc_state::pc8801mc(machine_config &config)
 {
 	pc8801ma(config);
 
-	PC8801_31(config, m_cdrom_if, 0);
+	PC8801_31(config, m_cdrom_if);
 	m_cdrom_if->rom_bank_cb().set([this](bool state) { m_cdrom_bank = state; });
 	m_cdrom_if->drq_cb().set(m_dma, FUNC(i8257_device::dreq1_w));
 	m_dma->in_ior_cb<1>().set(m_cdrom_if, FUNC(pc8801_31_device::dma_r));
@@ -1816,8 +1816,9 @@ ROM_START( pc8801 )
 	ROM_LOAD( "n88.rom",   0x0000, 0x8000, CRC(ffd68be0) SHA1(3518193b8207bdebf22c1380c2db8c554baff329) )
 	ROM_LOAD( "n88_0.rom", 0x8000, 0x2000, CRC(61984bab) SHA1(d1ae642aed4f0584eeb81ff50180db694e5101d4) )
 
+	// optional Kanji ROM
 	ROM_REGION( 0x20000, "kanji", ROMREGION_ERASEFF )
-	ROM_LOAD_OPTIONAL( "kanji1.rom", 0x00000, 0x20000, CRC(6178bd43) SHA1(82e11a177af6a5091dd67f50a2f4bafda84d6556) )
+	ROM_LOAD( "kanji1.rom", 0x00000, 0x20000, CRC(6178bd43) SHA1(82e11a177af6a5091dd67f50a2f4bafda84d6556) )
 
 	ROM_REGION( 0x20000, "kanji_lv2", ROMREGION_ERASEFF )
 
@@ -1838,8 +1839,9 @@ ROM_START( pc8801mk2 )
 	ROM_LOAD( "m2_n88.rom",   0x0000, 0x8000, CRC(f35169eb) SHA1(ef1f067f819781d9fb2713836d195866f0f81501) )
 	ROM_LOAD( "m2_n88_0.rom", 0x8000, 0x2000, CRC(5eb7a8d0) SHA1(95a70af83b0637a5a0f05e31fb0452bb2cb68055) )
 
+	// optional Kanji ROM
 	ROM_REGION( 0x20000, "kanji", ROMREGION_ERASEFF )
-	ROM_LOAD_OPTIONAL( "kanji1.rom", 0x00000, 0x20000, CRC(6178bd43) SHA1(82e11a177af6a5091dd67f50a2f4bafda84d6556) )
+	ROM_LOAD( "kanji1.rom", 0x00000, 0x20000, CRC(6178bd43) SHA1(82e11a177af6a5091dd67f50a2f4bafda84d6556) )
 
 	ROM_REGION( 0x20000, "kanji_lv2", ROMREGION_ERASEFF )
 
@@ -1863,7 +1865,7 @@ ROM_START( pc8801mk2sr )
 
 	ROM_REGION( 0x20000, "kanji_lv2", ROMREGION_ERASEFF )
 	// not on stock mkIISR
-	ROM_LOAD_OPTIONAL( "kanji2.rom", 0x00000, 0x20000, CRC(154803cc) SHA1(7e6591cd465cbb35d6d3446c5a83b46d30fafe95) )
+	ROM_LOAD( "kanji2.rom", 0x00000, 0x20000, CRC(154803cc) SHA1(7e6591cd465cbb35d6d3446c5a83b46d30fafe95) )
 
 	ROM_REGION( 0x800, "cgrom", 0)
 	ROM_COPY( "kanji", 0x1000, 0x0000, 0x800 )

@@ -31,7 +31,7 @@ end
 
 if _OPTIONS["SDL_INI_PATH"]~=nil then
 	defines {
-		"'INI_PATH=\"" .. _OPTIONS["SDL_INI_PATH"] .. "\"'",
+		"INI_PATH=\"" .. _OPTIONS["SDL_INI_PATH"] .. "\"",
 	}
 end
 
@@ -133,7 +133,7 @@ elseif _OPTIONS["targetos"]=="linux" then
 		}
 	else
 		buildoptions {
-			backtick(pkgconfigcmd() .. " --cflags Qt5Widgets"),
+			"-I$(shell qmake6 -query QT_INSTALL_HEADERS)",
 		}
 	end
 elseif _OPTIONS["targetos"]=="macosx" then
@@ -164,4 +164,3 @@ configuration { "netbsd" }
 	}
 
 configuration { }
-

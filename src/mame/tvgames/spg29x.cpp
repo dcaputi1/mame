@@ -365,8 +365,6 @@ INPUT_PORTS_END
 
 void spg29x_game_state::machine_start()
 {
-	m_leds.resolve();
-
 	save_item(NAME(m_tve_control));
 	save_item(NAME(m_tve_fade_offset));
 	save_item(NAME(m_timers_clk_sel));
@@ -490,10 +488,10 @@ void spg29x_game_state::hyperscan(machine_config &config)
 
 	CDROM(config, "cdrom").set_interface("cdrom");
 
-	HYPERSCAN_CTRL(config, m_hyperscan_ctrl[0], 0);
-	HYPERSCAN_CTRL(config, m_hyperscan_ctrl[1], 0);
+	HYPERSCAN_CTRL(config, m_hyperscan_ctrl[0]);
+	HYPERSCAN_CTRL(config, m_hyperscan_ctrl[1]);
 
-	HYPERSCAN_CARD(config, m_hyperscan_card, 0);
+	HYPERSCAN_CARD(config, m_hyperscan_card);
 
 	SOFTWARE_LIST(config, "cd_list").set_original("hyperscan");
 	SOFTWARE_LIST(config, "card_list").set_original("hyperscan_card");
@@ -625,7 +623,7 @@ COMP( 2011, jak_bbsf,   0,      0,      spg29x, hyperscan, spg29x_nand_game_stat
 
 COMP( 201?, zonefamf,  0,      0,      spg29x, hyperscan, spg29x_zonefamf_game_state, nand_zonefamf,"Zone", "Zone Family Fit", MACHINE_NOT_WORKING | MACHINE_NO_SOUND )
 // uses SPG291A-Hl171
-COMP( 2007, prail07,   0,      0,      spg29x, hyperscan, spg29x_zonefamf_game_state, nand_zonefamf,"Tomy Takara", "Boku wa Plarail Untenshi - Shinkansen de Ikou! (2007 version) (Japan)", MACHINE_NOT_WORKING | MACHINE_NO_SOUND )
+COMP( 2007, prail07,   0,      0,      spg29x, hyperscan, spg29x_zonefamf_game_state, nand_zonefamf,"Takara Tomy", "Boku wa Plarail Untenshi - Shinkansen de Ikou! (2007 version) (Japan)", MACHINE_NOT_WORKING | MACHINE_NO_SOUND )
 
 CONS( 2007, bratzlfe,  0,      0,      spg29x, hyperscan, spg29x_game_state, empty_init,  "MGA", "Bratz Life",   MACHINE_NO_SOUND | MACHINE_NOT_WORKING)
 
