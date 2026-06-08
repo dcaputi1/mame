@@ -23,6 +23,7 @@
 #include "corestr.h"
 
 #include <cstdio>
+#include <unordered_set>
 
 
 
@@ -1191,6 +1192,11 @@ void input_manager::seq_from_tokens(input_seq &seq, std::string_view string)
 
 bool input_manager::map_device_to_controller(const devicemap_table &table)
 {
+	// Track devices already assigned by a previous table entry so that
+	// duplicate-GUID entries map to successive devices rather than all
+	// resolving to the same (first-found) device.
+	std::unordered_set<input_device *> already_mapped;
+
 	for (const auto &it : table)
 	{
 		std::string_view deviceid = it.first;
@@ -1228,13 +1234,16 @@ bool input_manager::map_device_to_controller(const devicemap_table &table)
 		if (devindex >= DEVICE_INDEX_MAXIMUM)
 			return false;
 
-		// enumerate through devices and look for a match
+		// enumerate through devices and look for a match; skip devices that
+		// were already assigned by an earlier entry (handles duplicate GUIDs)
 		input_class *input_devclass = m_class[devclass].get();
 		for (int devnum = 0; devnum <= input_devclass->maxindex(); devnum++)
 		{
 			input_device *device = input_devclass->device(devnum);
-			if (device && device->match_device_id(deviceid))
+			if (device && device->match_device_id(deviceid) && !already_mapped.count(device))
 			{
+				already_mapped.insert(device);
+
 				// remap devindex
 				input_devclass->remap_device_index(device->devindex(), devindex);
 				osd_printf_verbose("Input: Remapped %s #%d: %s (device id: %s)\n", input_devclass->name(), devindex + 1, device->name(), device->id());
